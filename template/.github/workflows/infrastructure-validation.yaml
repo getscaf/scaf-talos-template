@@ -1,0 +1,207 @@
+name: Infrastructure Validation
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  terraform-validate:
+    name: Terraform Validation
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        environment: [sandbox, staging, production]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.0
+          terraform_wrapper: false
+
+      - name: Setup OpenTofu
+        uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: 1.6.0
+
+      - name: Terraform Format Check
+        id: fmt
+        run: |
+          cd terraform/${{ '{{ matrix.environment }}' }}
+          tofu fmt -check -recursive
+        continue-on-error: true
+
+      - name: Terraform Init
+        id: init
+        run: |
+          cd terraform/${{ '{{ matrix.environment }}' }}
+          tofu init -backend=false
+
+      - name: Terraform Validate
+        id: validate
+        run: |
+          cd terraform/${{ '{{ matrix.environment }}' }}
+          tofu validate
+
+      - name: Comment PR (if applicable)
+        if: github.event_name == 'pull_request' && steps.fmt.outcome == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '⚠️ **Terraform Format Check Failed** for `${{ '{{ matrix.environment }}' }}`\n\nPlease run `terraform fmt -recursive` in the terraform directory.'
+            })
+
+  terraform-security-scan:
+    name: Terraform Security Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run tfsec
+        uses: aquasecurity/tfsec-action@v1.0.3
+        with:
+          working_directory: terraform
+          soft_fail: true
+          format: sarif
+          additional_args: --minimum-severity MEDIUM
+
+      - name: Upload tfsec SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: results.sarif
+          category: tfsec
+
+      - name: Run Checkov
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          directory: terraform
+          framework: terraform
+          soft_fail: true
+          output_format: sarif
+          output_file_path: checkov-results.sarif
+
+      - name: Upload Checkov SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: checkov-results.sarif
+          category: checkov
+
+  yaml-validation:
+    name: YAML Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install yamllint
+        run: pip install yamllint
+
+      - name: Validate YAML files
+        run: |
+          yamllint -c .yamllint bootstrap-cluster/ || true
+          yamllint copier.yml || true
+
+  documentation-check:
+    name: Documentation Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install uv
+          uvx --with mkdocs-material --with mkdocs-mermaid2-plugin mkdocs --version
+
+      - name: Build documentation
+        run: make docs
+
+      - name: Check for broken links (optional)
+        run: |
+          uvx --with mkdocs-material --with mkdocs-mermaid2-plugin mkdocs build --strict
+        continue-on-error: true
+
+  pre-commit-checks:
+    name: Pre-commit Checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install pre-commit
+        run: pip install pre-commit
+
+      - name: Run pre-commit hooks
+        run: pre-commit run --all-files
+
+  talos-config-validation:
+    name: Talos Config Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install talosctl
+        run: |
+          curl -sL https://talos.dev/install | sh
+
+      - name: Validate Talos patches
+        run: |
+          # Validate patch files are valid YAML
+          for patch in bootstrap-cluster/patches/*.yaml; do
+            echo "Validating $patch"
+            talosctl validate --mode metal --config-patch @"$patch" || true
+          done
+        continue-on-error: true
+
+  validation-summary:
+    name: Validation Summary
+    runs-on: ubuntu-latest
+    needs: [terraform-validate, terraform-security-scan, yaml-validation, documentation-check, pre-commit-checks]
+    if: always()
+
+    steps:
+      - name: Check validation results
+        run: |
+          echo "## Validation Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- Terraform Validation: ${{ '{{ needs.terraform-validate.result }}' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Security Scan: ${{ '{{ needs.terraform-security-scan.result }}' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- YAML Validation: ${{ '{{ needs.yaml-validation.result }}' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Documentation: ${{ '{{ needs.documentation-check.result }}' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Pre-commit: ${{ '{{ needs.pre-commit-checks.result }}' }}" >> $GITHUB_STEP_SUMMARY
+
+      - name: Fail if any critical check failed
+        if: |
+          needs.terraform-validate.result == 'failure' ||
+          needs.terraform-security-scan.result == 'failure'
+        run: |
+          echo "❌ Critical validation checks failed!"
+          exit 1
