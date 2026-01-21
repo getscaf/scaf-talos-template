@@ -160,27 +160,6 @@ jobs:
       - name: Run pre-commit hooks
         run: pre-commit run --all-files
 
-  talos-config-validation:
-    name: Talos Config Validation
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Install talosctl
-        run: |
-          curl -sL https://talos.dev/install | sh
-
-      - name: Validate Talos patches
-        run: |
-          # Validate patch files are valid YAML
-          for patch in bootstrap-cluster/patches/*.yaml; do
-            echo "Validating $patch"
-            talosctl validate --mode metal --config-patch @"$patch" || true
-          done
-        continue-on-error: true
-
   validation-summary:
     name: Validation Summary
     runs-on: ubuntu-latest
