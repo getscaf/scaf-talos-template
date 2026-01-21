@@ -7,8 +7,3 @@ output "control_plane_nodes_private_ips" {
   description = "The private ip addresses of the control plane nodes."
   value       = join(",", module.control_plane_nodes.*.private_ip)
 }
-
-output "backend_ecr_repo" {
-  description = "The Backend ECR repository"
-  value       = module.ecr_backend.repository_url
-}

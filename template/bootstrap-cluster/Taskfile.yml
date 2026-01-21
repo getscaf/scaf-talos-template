@@ -3,12 +3,6 @@ vars:
   ENV: {{ "'{{.ENV}}'" }}
 
 includes:
-  argocd:
-    taskfile: ./argocd.yaml
-    vars:
-      ENV: {{ "'{{.ENV}}'" }}
-      ARGOCD_VERSION: {{ "'{{.ARGOCD_VERSION}}'" }}
-
   talos:
     taskfile: ./talos.yaml
     vars:

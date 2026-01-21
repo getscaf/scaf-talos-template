@@ -40,23 +40,17 @@ def party_popper():
         print("\r💥 POP! 🎉", end="", flush=True)
         subprocess.run(["sleep", "0.3"])
 
-    print("\r🎊 Congrats! Your {{ copier__project_slug }} project is ready! 🎉")
+    print("\r🎊 Congrats! Your {{ copier__project_slug }} Talos cluster project is ready! 🎉")
     print()
-    print("To get started, run:")
-    print("cd {{ copier__project_slug }}")
-    print("tilt up")
+    print("To get started:")
+    print("1. cd {{ copier__project_slug }}")
+    print("2. Deploy infrastructure: cd terraform/sandbox && tofu init && tofu apply")
+    print("3. Bootstrap Talos: cd ../../bootstrap-cluster/sandbox && task talos:bootstrap")
     print()
 
 
 def run_setup():
-    subprocess.run(
-        shlex.split("kind create cluster --name {{ copier__project_dash }}"), check=True
-    )
-    subprocess.run(shlex.split("make compile"), check=True)
-
-    print("Dependencies compiled successfully.")
     print("Performing initial commit.")
-
     subprocess.run(shlex.split("git add ."), check=True)
     subprocess.run(shlex.split("git commit -m 'Initial commit' --quiet"), check=True)
 

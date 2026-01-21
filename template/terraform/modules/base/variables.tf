@@ -33,31 +33,9 @@ variable "domain_name" {
   default = "{{ copier__domain_name }}"
 }
 
-variable "api_domain_name" {
-  type    = string
-  default = "api.{{ copier__domain_name }}"
-}
-
 variable "cluster_domain_name" {
   type    = string
   default = "k8s.{{ copier__domain_name }}"
-}
-{% if copier__create_nextjs_frontend %}
-variable "nextjs_domain_name" {
-  type    = string
-  default = "nextjs.{{ copier__domain_name }}"
-}
-{% endif %}
-
-variable "argocd_domain_name" {
-  type    = string
-  default = "argocd.{{ copier__domain_name }}"
-}
-
-
-variable "prometheus_domain_name" {
-  type    = string
-  default = "prometheus.{{ copier__domain_name }}"
 }
 
 variable "kubernetes_version" {
@@ -108,20 +86,6 @@ variable "repo_name" {
 variable "repo_url" {
   type    = string
   default = "{{ copier__repo_url }}"
-}
-
-{% if copier__create_nextjs_frontend %}
-variable "frontend_ecr_repo" {
-  description = "The Frontend ECR repository name"
-  type        = string
-  default     = "{{ copier__project_dash }}-sandbox-frontend"
-}
-{% endif %}
-
-variable "backend_ecr_repo" {
-  description = "The backend ECR repository name"
-  type        = string
-  default     = "{{ copier__project_dash }}-sandbox-backend"
 }
 
 variable "admin_allowed_ips" {

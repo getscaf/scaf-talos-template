@@ -1,12 +1,10 @@
 copier__author_name: Iam Scafman
 copier__aws_account_id: "000000000000"
 copier__aws_region: us-east-1
-copier__create_nextjs_frontend: y
-copier__description: My Awesome Scaf Project!
+copier__description: Talos Kubernetes Cluster Template
 copier__domain_name: sixfeetup.com
 copier__existing_hosted_zone: scaf.sixfeetup.com
 copier__email: iamscafman@sixfeetup.com
-copier__mail_service: Amazon SES
 copier__operating_system: talos
 copier__project_dash: my-awesome-scaf-project
 copier__project_name: My Awesome Scaf Project
@@ -16,6 +14,4 @@ copier__repo_url: git@github.com:sixfeetup/my_awesome_scaf_project.git
 copier__source_control_organization_slug: sixfeetup
 copier__source_control_provider: github.com
 copier__timezone: US/Eastern
-copier__use_celery: n
-copier__use_sentry: n
 copier__version: 0.1.0
