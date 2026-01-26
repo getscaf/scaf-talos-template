@@ -1,0 +1,18 @@
+version: '3'
+vars:
+  ENV: {{ "'{{.ENV}}'" }}
+
+dotenv: ['.env', '{{ "{{.ENV}}" }}/.env']
+
+includes:
+  talos:
+    taskfile: ./talos.yaml
+    vars:
+      ENV: {{ "'{{.ENV}}'" }}
+
+tasks:
+  default:
+    desc: |
+      List all available tasks in the Taskfile.
+    cmds:
+      - task --list
