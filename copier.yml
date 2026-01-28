@@ -1,0 +1,143 @@
+# Copier configuration/questions for "SFU fullstack project template"
+_templates_suffix: ""
+
+_tasks:
+  - python tasks.py
+
+_subdirectory: template
+
+copier__project_name_raw:
+  type: str
+  default: "My Awesome Scaf Project"
+  help: "The name of your project."
+  validator: >-
+    {% if not copier__project_name_raw.strip() %}
+      "Project name cannot be empty."
+    {% endif %}
+
+copier__project_name:
+  type: str
+  default: "{{ copier__project_name_raw | replace(\"'\", \"\") | replace('\"', '') }}"
+  when: false
+
+copier__project_slug:
+  type: str
+  default: "{{ is_project_slug if is_project_slug else copier__project_name.lower().replace(' ', '_').replace('-', '_').replace('.', '_').strip() }}"
+  help: "The project slug derived from the project name."
+  validator: >-
+    {% if not copier__project_slug.isidentifier() %}
+      "'{{ copier__project_slug }}' is not a valid Python identifier."
+    {% elif copier__project_slug != copier__project_slug.lower() %}
+      "'{{ copier__project_slug }}' must be all lowercase."
+    {% elif not copier__project_slug.strip() %}
+      "Project slug cannot be empty."
+    {% endif %}
+
+copier__project_dash:
+  type: str
+  default: "{{ copier__project_slug.lower().replace(' ', '-').replace('_', '-').replace('.', '-').strip() }}"
+  help: "The project name in dash-separated format."
+  when: false
+
+copier__rfc1123_subdomain:
+  type: str
+  default: "{{ copier__project_slug.lower().replace('_', '-') | regex_replace('[^a-z0-9-]', '') }}"
+  help: "A RFC 1123 compliant version of the project slug."
+  when: false
+
+copier__description:
+  type: str
+  default: "Behold My Awesome Project!"
+  help: "A brief description of your project."
+  validator: >-
+    {% if not copier__description.strip() %}
+      "Description cannot be empty."
+    {% endif %}
+
+copier__author_name:
+  type: str
+  default: "Joe Scaf"
+  help: "The name of the author."
+  validator: >-
+    {% if "\\" in copier__author_name %}
+      "Backslashes ('\\') are not allowed in the author name."
+    {% elif not copier__author_name.strip() %}
+      "Author name cannot be empty."
+    {% elif not copier__author_name.replace(" ", "").replace("-", "").replace("'", "").isalpha() %}
+      "'{{ copier__author_name }}' should contain only alphabetic characters, spaces, hyphens, and apostrophes."
+    {% endif %}
+
+copier__domain_name:
+  type: str
+  default: "sixfeetup.com"
+  help: "The domain name associated with the project."
+  validator: >-
+    {% if not copier__domain_name.strip() %}
+      "Domain name cannot be empty."
+    {% endif %}
+
+copier__existing_hosted_zone:
+  type: str
+  default: ""
+  help: "Enter the existing hosted zone name if you want to reuse one (e.g., domain.tld for subdomain.domain.tld projects). Leave empty to create a new hosted zone."
+  validator: >-
+    {% if copier__existing_hosted_zone.strip() and not copier__domain_name.endswith("." + copier__existing_hosted_zone) %}
+      "The domain name '{{ copier__domain_name }}' must be a subdomain of the hosted zone '{{ copier__existing_hosted_zone }}'"
+    {% endif %}
+
+copier__email:
+  type: str
+  default: "{{ copier__author_name.lower().replace(' ', '-') }}@{{ copier__domain_name }}"
+  help: "The author's email address."
+  validator: >-
+    {% if not copier__email.strip() %}
+      "Email cannot be empty."
+    {% elif "@" not in copier__email %}
+      "'{{ copier__email }}' is not a valid email address."
+    {% endif %}
+
+copier__version:
+  type: str
+  default: "0.1.0"
+  help: "The initial version of the project."
+  validator: >-
+    {% if not copier__version.strip() %}
+      "Version cannot be empty."
+    {% endif %}
+
+copier__timezone:
+  type: str
+  default: "America/New_York"
+  help: "The default timezone for the project."
+  validator: >-
+    {% if not copier__timezone.strip() %}
+      "Timezone cannot be empty."
+    {% endif %}
+
+copier__aws_region:
+  type: str
+  default: "us-east-1"
+  help: "AWS region for deployment."
+  validator: >-
+    {% if not copier__aws_region.strip() %}
+      "AWS region cannot be empty."
+    {% endif %}
+
+copier__aws_account_id:
+  type: str
+  default: "000000000000"
+  help: "AWS account ID for deployment."
+  validator: >-
+    {% if not copier__aws_account_id.strip() %}
+      "AWS account ID cannot be empty."
+    {% endif %}
+
+copier__talos_version:
+  type: str
+  default: "1.12.1"
+  help: "Talos Linux version for the cluster."
+  validator: >-
+    {% if not copier__talos_version.strip() %}
+      "Talos version cannot be empty."
+    {% endif %}
+
