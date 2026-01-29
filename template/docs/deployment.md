@@ -521,7 +521,13 @@ rm -f talosconfig kubeconfig controlplane.yaml
 
 ### Step 3 (Optional): Remove Secrets from AWS Secrets Manager
 
-If you want to remove the stored credentials:
+If you want to remove the stored credentials, you can use the task command:
+
+```bash
+task talos:delete_all_secrets
+```
+
+Or manually delete them:
 
 ```bash
 aws secretsmanager delete-secret --secret-id sandbox_talosconfig_yaml --force-delete-without-recovery

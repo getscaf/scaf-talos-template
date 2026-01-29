@@ -29,3 +29,8 @@ output "existing_hosted_zone" {
   description = "Existing hosted zone name"
   value       = "{{ copier__existing_hosted_zone }}"
 }
+
+output "terraform_state_name" {
+  description = "Name for S3 bucket and DynamoDB table for Terraform state"
+  value       = "{{ copier__terraform_state_name }}"
+}
