@@ -18,7 +18,7 @@ terraform {
 }
 
 resource "aws_s3_bucket" "terraform_state" {
-  bucket = "${module.global_variables.application}-terraform-state"
+  bucket = "{{ copier__terraform_state_name }}"
 
   # Allows deleting the bucket even if it contains objects.
   # This is useful for teardown environments.
@@ -37,7 +37,7 @@ resource "aws_s3_bucket_versioning" "tf_state_versioning" {
 }
 
 resource "aws_dynamodb_table" "terraform_state" {
-  name           = "${module.global_variables.application}-terraform-state"
+  name           = "{{ copier__terraform_state_name }}"
   read_capacity  = 5
   write_capacity = 5
   hash_key       = "LockID"

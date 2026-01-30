@@ -2,7 +2,7 @@
   <img src="scaf-logo.png" width="250px">
 </p>
 
-**scaf-talos-template** provides DevOps engineers and infrastructure teams with a complete blueprint for deploying production-ready Talos Linux Kubernetes clusters on AWS.
+**talos-template** provides DevOps engineers and infrastructure teams with a complete blueprint for deploying production-ready Talos Linux Kubernetes clusters on AWS.
 
 This template generates infrastructure-as-code for a secure, immutable Kubernetes cluster using Talos Linux. A new project contains the following:
 
@@ -37,10 +37,10 @@ Run the following command to create a new project:
 
 ```bash
 # If you have the template checked out locally:
-scaf myproject ./scaf-talos-template
+scaf myproject ./talos-template
 
 # Or use the GitHub URL directly:
-scaf myproject https://github.com/getscaf/scaf-talos-template.git
+scaf myproject https://github.com/getscaf/talos-template.git
 ```
 
 Answer all the questions, and you'll have your new Talos cluster infrastructure project!
@@ -123,6 +123,10 @@ cd ../../bootstrap-cluster/sandbox  # or staging, production
 rm -f talosconfig kubeconfig controlplane.yaml
 
 # 3. (Optional) Remove secrets from AWS Secrets Manager
+# You can use the task command:
+task talos:delete_all_secrets
+
+# Or manually delete them:
 aws secretsmanager delete-secret --secret-id sandbox_talos_controlplane_yaml --force-delete-without-recovery
 aws secretsmanager delete-secret --secret-id sandbox_kubeconfig --force-delete-without-recovery
 aws secretsmanager delete-secret --secret-id sandbox_talosconfig_yaml --force-delete-without-recovery

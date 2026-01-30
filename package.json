@@ -1,5 +1,5 @@
 {
-  "name": "scaf-talos-template",
+  "name": "talos-template",
   "version": "1.11.1",
   "devDependencies": {
     "@semantic-release/changelog": "^6.0.3",

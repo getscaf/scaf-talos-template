@@ -132,6 +132,12 @@ copier__aws_account_id:
       "AWS account ID cannot be empty."
     {% endif %}
 
+copier__terraform_state_name:
+  type: str
+  default: "{{ copier__project_dash }}-tfstate-{{ copier__aws_account_id[-8:] }}"
+  help: "The name for S3 bucket and DynamoDB table for Terraform state."
+  when: false
+
 copier__talos_version:
   type: str
   default: "1.12.1"
